@@ -14,6 +14,7 @@ import Tuple exposing (first, second)
 
 type alias Model =
     { playerPos : ( Float, Float )
+    , playerVel : ( Float, Float )
     , inputs :
         { left : Bool
         , right : Bool
@@ -25,6 +26,7 @@ type alias Model =
 emptyModel : Model
 emptyModel =
     { playerPos = ( centerX, centerY )
+    , playerVel = ( centerX, centerY )
     , inputs =
         { left = False
         , right = False
@@ -73,6 +75,11 @@ playerSize =
     50
 
 
+gravitation : ( Float, Float )
+gravitation =
+    ( 0, -9.82 )
+
+
 main : Program () Model Msg
 main =
     Browser.element
@@ -94,7 +101,11 @@ update msg model =
             ( { model
                 | playerPos =
                     ( first model.playerPos + xDirection inputs * delta * playerSpeed
-                    , second model.playerPos
+                    , second model.playerPos + (second model.playerVel * delta)
+                    )
+                , playerVel =
+                    ( first model.playerVel + (first gravitation * delta)
+                    , second model.playerVel + (second gravitation * delta)
                     )
               }
             , Cmd.none

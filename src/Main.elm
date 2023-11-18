@@ -76,57 +76,60 @@ main =
     Browser.element
         { init = \() -> ( emptyModel, Cmd.none )
         , view = view
-        , update =
-            \msg model ->
-                let
-                    inputs =
-                        model.inputs
-                in
-                case msg of
-                    Frame delta ->
-                        ( { model
-                            | playerPos =
-                                ( first model.playerPos + xDirection inputs * delta * playerSpeed
-                                , second model.playerPos
-                                )
-                          }
-                        , Cmd.none
-                        )
-
-                    GotInput input ->
-                        case input of
-                            Down "ArrowLeft" ->
-                                ( { model
-                                    | inputs = { inputs | left = True }
-                                  }
-                                , Cmd.none
-                                )
-
-                            Up "ArrowLeft" ->
-                                ( { model
-                                    | inputs = { inputs | left = False }
-                                  }
-                                , Cmd.none
-                                )
-
-                            Down "ArrowRight" ->
-                                ( { model
-                                    | inputs = { inputs | right = True }
-                                  }
-                                , Cmd.none
-                                )
-
-                            Up "ArrowRight" ->
-                                ( { model
-                                    | inputs = { inputs | right = False }
-                                  }
-                                , Cmd.none
-                                )
-
-                            _ ->
-                                ( model, Cmd.none )
+        , update = update
         , subscriptions = subscriptions
         }
+
+
+update : Msg -> Model -> ( Model, Cmd msg )
+update msg model =
+    let
+        inputs =
+            model.inputs
+    in
+    case msg of
+        Frame delta ->
+            ( { model
+                | playerPos =
+                    ( first model.playerPos + xDirection inputs * delta * playerSpeed
+                    , second model.playerPos
+                    )
+              }
+            , Cmd.none
+            )
+
+        GotInput input ->
+            case input of
+                Down "ArrowLeft" ->
+                    ( { model
+                        | inputs = { inputs | left = True }
+                      }
+                    , Cmd.none
+                    )
+
+                Up "ArrowLeft" ->
+                    ( { model
+                        | inputs = { inputs | left = False }
+                      }
+                    , Cmd.none
+                    )
+
+                Down "ArrowRight" ->
+                    ( { model
+                        | inputs = { inputs | right = True }
+                      }
+                    , Cmd.none
+                    )
+
+                Up "ArrowRight" ->
+                    ( { model
+                        | inputs = { inputs | right = False }
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 centerX : Float

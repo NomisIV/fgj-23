@@ -27,7 +27,7 @@ type alias Model =
 emptyModel : Model
 emptyModel =
     { playerPos = ( centerX, centerY )
-    , playerVel = ( centerX, centerY )
+    , playerVel = ( 0, 0 )
     , inputs =
         { left = False
         , right = False

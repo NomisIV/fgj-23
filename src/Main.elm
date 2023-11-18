@@ -79,7 +79,7 @@ playerSize =
 
 gravitation : ( Float, Float )
 gravitation =
-    ( 0, -9.82 )
+    ( 0, 9.82 )
 
 
 main : Program () Model Msg

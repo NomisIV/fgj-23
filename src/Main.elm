@@ -94,6 +94,7 @@ gravitation =
     ( 0, 1000 )
 
 
+platformSpeed : number
 platformSpeed =
     100
 
@@ -221,14 +222,6 @@ view { playerPos, platforms } =
 clearScreen : Renderable
 clearScreen =
     shapes [ fill Color.black ] [ rect ( 0, 0 ) width height ]
-
-
-render : Model -> Renderable
-render { playerPos } =
-    shapes
-        [ fill Color.red
-        ]
-        [ rect playerPos playerSize playerSize ]
 
 
 type InputMsg

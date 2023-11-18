@@ -6,10 +6,11 @@ import Canvas exposing (..)
 import Canvas.Settings exposing (..)
 import Canvas.Settings.Advanced exposing (..)
 import Color
+import Debug exposing (log, toString)
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import Json.Decode as Decode
-import Random as Random
+import Random
 import Tuple exposing (first, second)
 
 
@@ -92,6 +93,11 @@ playerSize =
     50
 
 
+platformSize : ( number, number )
+platformSize =
+    ( 100, 10 )
+
+
 gravitation : ( Float, Float )
 gravitation =
     ( 0, 1000 )
@@ -117,6 +123,39 @@ main =
         }
 
 
+collide : Model -> Bool
+collide model =
+    let
+        falling =
+            second model.playerVel > 0
+
+        insidePlatform =
+            List.any
+                (\platform ->
+                    let
+                        leftCorner =
+                            ( first model.playerPos, second model.playerPos + playerSize )
+
+                        rightCorner =
+                            ( first model.playerPos + playerSize, second model.playerPos + playerSize )
+
+                        insidePlatform_ ( x, y ) =
+                            x
+                                >= first platform
+                                && x
+                                <= (first platform + first platformSize)
+                                && y
+                                >= second platform
+                                && y
+                                <= (second platform + second platformSize)
+                    in
+                    insidePlatform_ leftCorner || insidePlatform_ rightCorner
+                )
+                model.platforms
+    in
+    falling && insidePlatform
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -131,13 +170,17 @@ update msg model =
                     , second model.playerPos + ((second model.playerVel + platformSpeed) * delta)
                     )
                 , playerVel =
-                    ( first model.playerVel + (first gravitation * delta)
-                    , if inputs.up && canJump model then
-                        -playerJumpSpeed
+                    if collide model then
+                        ( 0, 0 )
 
-                      else
-                        second model.playerVel + (second gravitation * delta)
-                    )
+                    else
+                        ( first model.playerVel + (first gravitation * delta)
+                        , if inputs.up && canJump model then
+                            -playerJumpSpeed
+
+                          else
+                            second model.playerVel + (second gravitation * delta)
+                        )
                 , platforms =
                     model.platforms
                         |> List.map (\( x, y ) -> ( x, y + platformSpeed * delta ))
@@ -232,7 +275,7 @@ view { playerPos, platforms } =
             [ style "border" "10px solid rgba(0,0,0,0.1)" ]
             [ clearScreen
             , shapes [ fill Color.red ] [ rect playerPos playerSize playerSize ]
-            , shapes [ fill Color.white ] <| List.map (\pos -> rect pos 100 10) platforms
+            , shapes [ fill Color.white ] <| List.map (\pos -> rect pos (first platformSize) (second platformSize)) platforms
             ]
         ]
 

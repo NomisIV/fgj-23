@@ -38,6 +38,21 @@ type Msg
     | GotInput Input
 
 
+width : number
+width =
+    800
+
+
+height : number
+height =
+    800
+
+
+playerSize : number
+playerSize =
+    50
+
+
 main : Program () Model Msg
 main =
     Browser.element
@@ -78,16 +93,6 @@ main =
         }
 
 
-width : number
-width =
-    400
-
-
-height : number
-height =
-    400
-
-
 centerX : Float
 centerX =
     width / 2
@@ -121,14 +126,10 @@ clearScreen =
 
 render : Model -> Renderable
 render { playerPos } =
-    let
-        size =
-            width / 3
-    in
     shapes
         [ fill Color.red
         ]
-        [ rect playerPos size size ]
+        [ rect playerPos playerSize playerSize ]
 
 
 type Input

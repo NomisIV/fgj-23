@@ -16,6 +16,7 @@
           elmPackages.elm
           elmPackages.elm-language-server
           elmPackages.elm-format
+          watchexec
         ];
       };
 

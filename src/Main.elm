@@ -5,6 +5,7 @@ import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
 import Canvas exposing (..)
 import Canvas.Settings exposing (..)
 import Canvas.Settings.Advanced exposing (..)
+import Canvas.Settings.Text exposing (TextAlign(..), align, font)
 import Color
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
@@ -281,7 +282,7 @@ centerY =
 
 
 view : Model -> Html Msg
-view { playerPos, platforms } =
+view { playerPos, platforms, score } =
     div
         [ style "display" "flex"
         , style "justify-content" "center"
@@ -291,6 +292,10 @@ view { playerPos, platforms } =
             ( width, height )
             [ style "border" "10px solid rgba(0,0,0,0.1)" ]
             [ clearScreen
+            , text
+                [ font { size = 36, family = "sans-serif" }, align Left, fill Color.white ]
+                ( 8, 36 )
+                ("Score: " ++ String.fromInt score)
             , shapes [ fill Color.red ] [ rect playerPos playerSize playerSize ]
             , shapes [ fill Color.white ] <| List.map (\pos -> rect pos (first platformSize) (second platformSize)) platforms
             ]

@@ -18,6 +18,7 @@ type alias Model =
     , inputs :
         { left : Bool
         , right : Bool
+        , up : Bool
         }
     , platforms : List ( Float, Float )
     }
@@ -30,6 +31,7 @@ emptyModel =
     , inputs =
         { left = False
         , right = False
+        , up = False
         }
     , platforms = [ ( 400, 500 ) ]
     }
@@ -141,6 +143,20 @@ update msg model =
                     , Cmd.none
                     )
 
+                Down UpArrow ->
+                    ( { model
+                        | inputs = { inputs | up = True }
+                      }
+                    , Cmd.none
+                    )
+
+                Up UpArrow ->
+                    ( { model
+                        | inputs = { inputs | up = False }
+                      }
+                    , Cmd.none
+                    )
+
                 NotHandled ->
                     ( model, Cmd.none )
 
@@ -194,6 +210,7 @@ type InputMsg
 type Input
     = LeftArrow
     | RightArrow
+    | UpArrow
 
 
 subscriptions : model -> Sub Msg
@@ -224,6 +241,9 @@ handleKey dir repeat key =
 
             "ArrowLeft" ->
                 dir LeftArrow
+
+            "ArrowUp" ->
+                dir UpArrow
 
             _ ->
                 NotHandled

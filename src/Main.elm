@@ -18,6 +18,7 @@ type alias Model =
         { left : Bool
         , right : Bool
         }
+    , platforms : List ( Float, Float )
     }
 
 
@@ -28,6 +29,7 @@ emptyModel =
         { left = False
         , right = False
         }
+    , platforms = [ ( 400, 500 ) ]
     }
 
 
@@ -143,7 +145,7 @@ centerY =
 
 
 view : Model -> Html Msg
-view model =
+view { playerPos, platforms } =
     div
         [ style "display" "flex"
         , style "justify-content" "center"
@@ -153,7 +155,8 @@ view model =
             ( width, height )
             [ style "border" "10px solid rgba(0,0,0,0.1)" ]
             [ clearScreen
-            , render model
+            , shapes [ fill Color.red ] [ rect playerPos playerSize playerSize ]
+            , shapes [ fill Color.white ] <| List.map (\pos -> rect pos 100 10) platforms
             ]
         ]
 
@@ -161,14 +164,6 @@ view model =
 clearScreen : Renderable
 clearScreen =
     shapes [ fill Color.black ] [ rect ( 0, 0 ) width height ]
-
-
-render : Model -> Renderable
-render { playerPos } =
-    shapes
-        [ fill Color.red
-        ]
-        [ rect playerPos playerSize playerSize ]
 
 
 type Input

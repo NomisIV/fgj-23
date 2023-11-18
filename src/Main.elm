@@ -36,7 +36,15 @@ emptyModel =
         , right = False
         , up = False
         }
-    , platforms = [ ( 400, 500 ) ]
+    , platforms =
+        [ ( 400, 500 )
+        , ( 400, 400 )
+        , ( 400, 300 )
+        , ( 400, 200 )
+        , ( 400, 100 )
+        , ( 400, 0 )
+        , ( 400, -100 )
+        ]
     , platformTimer = spawnRate
     }
 

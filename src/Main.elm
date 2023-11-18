@@ -43,7 +43,6 @@ emptyModel =
         , ( 400, 200 )
         , ( 400, 100 )
         , ( 400, 0 )
-        , ( 400, -100 )
         ]
     , platformTimer = spawnRate
     }

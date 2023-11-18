@@ -6,7 +6,6 @@ import Canvas exposing (..)
 import Canvas.Settings exposing (..)
 import Canvas.Settings.Advanced exposing (..)
 import Color
-import Debug exposing (log, toString)
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import Json.Decode as Decode
@@ -24,6 +23,7 @@ type alias Model =
         }
     , platforms : List ( Float, Float )
     , platformTimer : Float
+    , score : Int
     }
 
 
@@ -45,6 +45,7 @@ emptyModel =
         , ( 400, 0 )
         ]
     , platformTimer = spawnRate
+    , score = 0
     }
 
 
@@ -71,11 +72,6 @@ xDirection { left, right } =
 
     else
         0
-
-
-canJump : Model -> Bool
-canJump model =
-    second model.playerVel >= 0
 
 
 type Msg
@@ -206,6 +202,7 @@ update msg model =
                         |> List.map (\( x, y ) -> ( x, y + platformSpeed * delta ))
                         |> List.filter (\( _, y ) -> y <= height + 100)
                 , platformTimer = model.platformTimer - delta * spawnRate
+                , score = model.score + 1
               }
             , if model.platformTimer < 0 then
                 Random.generate SpawnPlatform (Random.float 0 width)

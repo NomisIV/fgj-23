@@ -39,6 +39,11 @@ emptyModel =
 
 playerSpeed : number
 playerSpeed =
+    700
+
+
+playerJumpSpeed : number
+playerJumpSpeed =
     500
 
 
@@ -55,6 +60,11 @@ xDirection { left, right } =
 
     else
         0
+
+
+canJump : Model -> Bool
+canJump model =
+    second model.playerVel >= 0
 
 
 type Msg
@@ -79,7 +89,7 @@ playerSize =
 
 gravitation : ( Float, Float )
 gravitation =
-    ( 0, 9.82 )
+    ( 0, 1000 )
 
 
 main : Program () Model Msg
@@ -107,7 +117,11 @@ update msg model =
                     )
                 , playerVel =
                     ( first model.playerVel + (first gravitation * delta)
-                    , second model.playerVel + (second gravitation * delta)
+                    , if inputs.up && canJump model then
+                        -playerJumpSpeed
+
+                      else
+                        second model.playerVel + (second gravitation * delta)
                     )
               }
             , Cmd.none

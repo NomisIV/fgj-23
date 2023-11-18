@@ -22,7 +22,7 @@ type alias Model =
         , right : Bool
         , up : Bool
         }
-    , platforms : List ( Float, Float )
+    , platforms : List { x : Float, y : Float, id : Int }
     , platformTimer : Float
     , score : Int
     }
@@ -38,12 +38,12 @@ emptyModel =
         , up = False
         }
     , platforms =
-        [ ( 400, 500 )
-        , ( 400, 400 )
-        , ( 400, 300 )
-        , ( 400, 200 )
-        , ( 400, 100 )
-        , ( 400, 0 )
+        [ { x = 400, y = 500, id = 0 }
+        , { x = 400, y = 400, id = 1 }
+        , { x = 400, y = 300, id = 2 }
+        , { x = 400, y = 200, id = 3 }
+        , { x = 400, y = 100, id = 4 }
+        , { x = 400, y = 0, id = 5 }
         ]
     , platformTimer = spawnRate
     , score = 0
@@ -127,37 +127,43 @@ main =
         }
 
 
-collide : Model -> Bool
+collide : Model -> Maybe Int
 collide model =
     let
         falling =
             second model.playerVel >= 0
 
         insidePlatform =
-            List.any
-                (\platform ->
-                    let
-                        leftCorner =
-                            ( first model.playerPos, second model.playerPos + playerSize )
+            model.platforms
+                |> List.filter
+                    (\platform ->
+                        let
+                            leftCorner =
+                                ( first model.playerPos, second model.playerPos + playerSize )
 
-                        rightCorner =
-                            ( first model.playerPos + playerSize, second model.playerPos + playerSize )
+                            rightCorner =
+                                ( first model.playerPos + playerSize, second model.playerPos + playerSize )
 
-                        insidePlatform_ ( x, y ) =
-                            x
-                                >= first platform
-                                && x
-                                <= (first platform + first platformSize)
-                                && y
-                                >= second platform
-                                && y
-                                <= (second platform + second platformSize)
-                    in
-                    insidePlatform_ leftCorner || insidePlatform_ rightCorner
-                )
-                model.platforms
+                            insidePlatform_ ( x, y ) =
+                                x
+                                    >= platform.x
+                                    && x
+                                    <= (platform.x + first platformSize)
+                                    && y
+                                    >= platform.y
+                                    && y
+                                    <= (platform.y + second platformSize)
+                        in
+                        insidePlatform_ leftCorner || insidePlatform_ rightCorner
+                    )
+                |> List.head
+                |> Maybe.map .id
     in
-    falling && insidePlatform
+    if falling then
+        insidePlatform
+
+    else
+        Nothing
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -166,8 +172,11 @@ update msg model =
         inputs =
             model.inputs
 
-        didCollide =
+        collidedWith =
             collide model
+
+        didCollide =
+            collidedWith /= Nothing
     in
     case msg of
         Frame delta ->
@@ -200,10 +209,10 @@ update msg model =
                         )
                 , platforms =
                     model.platforms
-                        |> List.map (\( x, y ) -> ( x, y + platformSpeed * delta ))
-                        |> List.filter (\( _, y ) -> y <= height + 100)
+                        |> List.map (\p -> { p | y = p.y + platformSpeed * delta })
+                        |> List.filter (\{ y } -> y <= height + 100)
                 , platformTimer = model.platformTimer - delta * spawnRate
-                , score = model.score + 1
+                , score = collidedWith |> Maybe.withDefault model.score |> max model.score
               }
             , if model.platformTimer < 0 then
                 Random.generate SpawnPlatform (Random.float 0 (width - first platformSize))
@@ -261,7 +270,7 @@ update msg model =
 
         SpawnPlatform x ->
             ( { model
-                | platforms = ( x, -10 ) :: model.platforms
+                | platforms = { x = x, y = -10, id = model.platforms |> List.head |> Maybe.map .id |> Maybe.withDefault 0 |> (+) 1 } :: model.platforms
                 , platformTimer = spawnRate
               }
             , Cmd.none
@@ -297,7 +306,7 @@ view { playerPos, platforms, score } =
                 ( 8, 36 )
                 ("Score: " ++ String.fromInt score)
             , shapes [ fill Color.red ] [ rect playerPos playerSize playerSize ]
-            , shapes [ fill Color.white ] <| List.map (\pos -> rect pos (first platformSize) (second platformSize)) platforms
+            , shapes [ fill Color.white ] <| List.map (\pos -> rect ( pos.x, pos.y ) (first platformSize) (second platformSize)) platforms
             ]
         ]
 

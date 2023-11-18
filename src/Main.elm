@@ -15,7 +15,9 @@ import Tuple exposing (first, second)
 type alias Model =
     { playerPos : ( Float, Float )
     , inputs :
-        { playerX : Float }
+        { left : Bool
+        , right : Bool
+        }
     }
 
 
@@ -23,7 +25,8 @@ emptyModel : Model
 emptyModel =
     { playerPos = ( centerX, centerY )
     , inputs =
-        { playerX = 0
+        { left = False
+        , right = False
         }
     }
 
@@ -31,6 +34,21 @@ emptyModel =
 playerSpeed : number
 playerSpeed =
     500
+
+
+xDirection : { a | left : Bool, right : Bool } -> number
+xDirection { left, right } =
+    if left == right then
+        0
+
+    else if left then
+        -1
+
+    else if right then
+        1
+
+    else
+        0
 
 
 type Msg
@@ -60,11 +78,15 @@ main =
         , view = view
         , update =
             \msg model ->
+                let
+                    inputs =
+                        model.inputs
+                in
                 case msg of
                     Frame delta ->
                         ( { model
                             | playerPos =
-                                ( first model.playerPos + model.inputs.playerX * delta * playerSpeed
+                                ( first model.playerPos + xDirection inputs * delta * playerSpeed
                                 , second model.playerPos
                                 )
                           }
@@ -75,28 +97,28 @@ main =
                         case input of
                             Down "ArrowLeft" ->
                                 ( { model
-                                    | inputs = { playerX = model.inputs.playerX - 1 }
+                                    | inputs = { inputs | left = True }
                                   }
                                 , Cmd.none
                                 )
 
                             Up "ArrowLeft" ->
                                 ( { model
-                                    | inputs = { playerX = model.inputs.playerX + 1 }
+                                    | inputs = { inputs | left = False }
                                   }
                                 , Cmd.none
                                 )
 
                             Down "ArrowRight" ->
                                 ( { model
-                                    | inputs = { playerX = model.inputs.playerX + 1 }
+                                    | inputs = { inputs | right = True }
                                   }
                                 , Cmd.none
                                 )
 
                             Up "ArrowRight" ->
                                 ( { model
-                                    | inputs = { playerX = model.inputs.playerX - 1 }
+                                    | inputs = { inputs | right = False }
                                   }
                                 , Cmd.none
                                 )

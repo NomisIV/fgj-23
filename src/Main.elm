@@ -127,7 +127,7 @@ collide : Model -> Bool
 collide model =
     let
         falling =
-            second model.playerVel > 0
+            second model.playerVel >= 0
 
         insidePlatform =
             List.any
@@ -161,25 +161,38 @@ update msg model =
     let
         inputs =
             model.inputs
+
+        didCollide =
+            collide model
     in
     case msg of
         Frame delta ->
             ( { model
                 | playerPos =
                     ( first model.playerPos + xDirection inputs * delta * playerSpeed
-                    , second model.playerPos + ((second model.playerVel + platformSpeed) * delta)
+                    , second model.playerPos
+                        + (((if not didCollide then
+                                second model.playerVel
+
+                             else
+                                0
+                            )
+                                + platformSpeed
+                           )
+                            * delta
+                          )
                     )
                 , playerVel =
-                    if collide model then
-                        ( 0, 0 )
+                    if didCollide then
+                        if inputs.up then
+                            ( first model.playerVel, -playerJumpSpeed )
+
+                        else
+                            ( first model.playerVel, 0 )
 
                     else
                         ( first model.playerVel + (first gravitation * delta)
-                        , if inputs.up && canJump model then
-                            -playerJumpSpeed
-
-                          else
-                            second model.playerVel + (second gravitation * delta)
+                        , second model.playerVel + (second gravitation * delta)
                         )
                 , platforms =
                     model.platforms

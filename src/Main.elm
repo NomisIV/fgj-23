@@ -55,7 +55,7 @@ xDirection { left, right } =
 
 type Msg
     = Frame Float
-    | GotInput Input
+    | GotInput InputMsg
 
 
 width : number
@@ -102,35 +102,35 @@ update msg model =
 
         GotInput input ->
             case input of
-                Down "ArrowLeft" ->
+                Down LeftArrow ->
                     ( { model
                         | inputs = { inputs | left = True }
                       }
                     , Cmd.none
                     )
 
-                Up "ArrowLeft" ->
+                Up LeftArrow ->
                     ( { model
                         | inputs = { inputs | left = False }
                       }
                     , Cmd.none
                     )
 
-                Down "ArrowRight" ->
+                Down RightArrow ->
                     ( { model
                         | inputs = { inputs | right = True }
                       }
                     , Cmd.none
                     )
 
-                Up "ArrowRight" ->
+                Up RightArrow ->
                     ( { model
                         | inputs = { inputs | right = False }
                       }
                     , Cmd.none
                     )
 
-                _ ->
+                NotHandled ->
                     ( model, Cmd.none )
 
 
@@ -166,15 +166,53 @@ clearScreen =
     shapes [ fill Color.black ] [ rect ( 0, 0 ) width height ]
 
 
+render : Model -> Renderable
+render { playerPos } =
+    shapes
+        [ fill Color.red
+        ]
+        [ rect playerPos playerSize playerSize ]
+
+
+type InputMsg
+    = Down Input
+    | Up Input
+    | NotHandled
+
+
 type Input
-    = Down String
-    | Up String
+    = LeftArrow
+    | RightArrow
 
 
 subscriptions : model -> Sub Msg
 subscriptions _ =
+    let
+        keyDecoder =
+            Decode.field "key" Decode.string
+
+        repeatDecoder =
+            Decode.field "repeat" Decode.bool
+    in
     Sub.batch
-        [ onKeyDown (Decode.field "key" Decode.string |> Decode.map (Down >> GotInput))
-        , onKeyUp (Decode.field "key" Decode.string |> Decode.map (Up >> GotInput))
+        [ onKeyDown (Decode.map2 (handleKey Down) repeatDecoder keyDecoder |> Decode.map GotInput)
+        , onKeyUp (Decode.map2 (handleKey Up) repeatDecoder keyDecoder |> Decode.map GotInput)
         , onAnimationFrameDelta (\v -> Frame (v / 1000))
         ]
+
+
+handleKey : (Input -> InputMsg) -> Bool -> String -> InputMsg
+handleKey dir repeat key =
+    if repeat then
+        NotHandled
+
+    else
+        case key of
+            "ArrowRight" ->
+                dir RightArrow
+
+            "ArrowLeft" ->
+                dir LeftArrow
+
+            _ ->
+                NotHandled

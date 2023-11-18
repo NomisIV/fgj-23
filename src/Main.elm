@@ -9,10 +9,28 @@ import Color
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import Json.Decode as Decode
+import Tuple exposing (first, second)
 
 
 type alias Model =
-    { playerPos : ( Float, Float ) }
+    { playerPos : ( Float, Float )
+    , inputs :
+        { playerX : Float }
+    }
+
+
+emptyModel : Model
+emptyModel =
+    { playerPos = ( centerX, centerY )
+    , inputs =
+        { playerX = 0
+        }
+    }
+
+
+playerSpeed : number
+playerSpeed =
+    500
 
 
 type Msg
@@ -23,16 +41,39 @@ type Msg
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \() -> ( { playerPos = ( centerX, centerY ) }, Cmd.none )
+        { init = \() -> ( emptyModel, Cmd.none )
         , view = view
         , update =
             \msg model ->
                 case msg of
-                    Frame _ ->
-                        ( model, Cmd.none )
+                    Frame delta ->
+                        ( { model
+                            | playerPos =
+                                ( first model.playerPos + model.inputs.playerX * delta * playerSpeed
+                                , second model.playerPos
+                                )
+                          }
+                        , Cmd.none
+                        )
 
-                    GotInput _ ->
-                        ( model, Cmd.none )
+                    GotInput input ->
+                        case input of
+                            Down "ArrowLeft" ->
+                                ( { model
+                                    | inputs = { playerX = -1 }
+                                  }
+                                , Cmd.none
+                                )
+
+                            Down "ArrowRight" ->
+                                ( { model
+                                    | inputs = { playerX = 1 }
+                                  }
+                                , Cmd.none
+                                )
+
+                            _ ->
+                                ( model, Cmd.none )
         , subscriptions = subscriptions
         }
 
@@ -98,5 +139,5 @@ subscriptions : model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ onKeyDown (Decode.field "key" Decode.string |> Decode.map (Down >> GotInput))
-        , onAnimationFrameDelta Frame
+        , onAnimationFrameDelta (\v -> Frame (v / 1000))
         ]

@@ -9,6 +9,7 @@ import Color
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import Json.Decode as Decode
+import Random as Random
 import Tuple exposing (first, second)
 
 
@@ -21,6 +22,7 @@ type alias Model =
         , up : Bool
         }
     , platforms : List ( Float, Float )
+    , platformTimer : Float
     }
 
 
@@ -34,6 +36,7 @@ emptyModel =
         , up = False
         }
     , platforms = [ ( 400, 500 ) ]
+    , platformTimer = spawnRate
     }
 
 
@@ -99,6 +102,11 @@ platformSpeed =
     100
 
 
+spawnRate : Float
+spawnRate =
+    1
+
+
 main : Program () Model Msg
 main =
     Browser.element
@@ -109,7 +117,7 @@ main =
         }
 
 
-update : Msg -> Model -> ( Model, Cmd msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         inputs =
@@ -134,8 +142,13 @@ update msg model =
                     model.platforms
                         |> List.map (\( x, y ) -> ( x, y + platformSpeed * delta ))
                         |> List.filter (\( _, y ) -> y <= height + 100)
+                , platformTimer = model.platformTimer - delta * spawnRate
               }
-            , Cmd.none
+            , if model.platformTimer < 0 then
+                Random.generate SpawnPlatform (Random.float 0 width)
+
+              else
+                Cmd.none
             )
 
         GotInput input ->
@@ -185,8 +198,13 @@ update msg model =
                 NotHandled ->
                     ( model, Cmd.none )
 
-        SpawnPlatform _ ->
-            ( model, Cmd.none )
+        SpawnPlatform x ->
+            ( { model
+                | platforms = ( x, -10 ) :: model.platforms
+                , platformTimer = spawnRate
+              }
+            , Cmd.none
+            )
 
         Noop ->
             ( model, Cmd.none )

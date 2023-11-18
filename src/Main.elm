@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Browser
-import Browser.Events exposing (onAnimationFrameDelta, onKeyDown)
+import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
 import Canvas exposing (..)
 import Canvas.Settings exposing (..)
 import Canvas.Settings.Advanced exposing (..)
@@ -75,14 +75,28 @@ main =
                         case input of
                             Down "ArrowLeft" ->
                                 ( { model
-                                    | inputs = { playerX = -1 }
+                                    | inputs = { playerX = model.inputs.playerX - 1 }
+                                  }
+                                , Cmd.none
+                                )
+
+                            Up "ArrowLeft" ->
+                                ( { model
+                                    | inputs = { playerX = model.inputs.playerX + 1 }
                                   }
                                 , Cmd.none
                                 )
 
                             Down "ArrowRight" ->
                                 ( { model
-                                    | inputs = { playerX = 1 }
+                                    | inputs = { playerX = model.inputs.playerX + 1 }
+                                  }
+                                , Cmd.none
+                                )
+
+                            Up "ArrowRight" ->
+                                ( { model
+                                    | inputs = { playerX = model.inputs.playerX - 1 }
                                   }
                                 , Cmd.none
                                 )
@@ -134,11 +148,13 @@ render { playerPos } =
 
 type Input
     = Down String
+    | Up String
 
 
 subscriptions : model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ onKeyDown (Decode.field "key" Decode.string |> Decode.map (Down >> GotInput))
+        , onKeyUp (Decode.field "key" Decode.string |> Decode.map (Up >> GotInput))
         , onAnimationFrameDelta (\v -> Frame (v / 1000))
         ]

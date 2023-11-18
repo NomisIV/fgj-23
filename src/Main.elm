@@ -70,6 +70,8 @@ canJump model =
 type Msg
     = Frame Float
     | GotInput InputMsg
+    | SpawnPlatform Float
+    | Noop
 
 
 width : number
@@ -90,6 +92,10 @@ playerSize =
 gravitation : ( Float, Float )
 gravitation =
     ( 0, 1000 )
+
+
+platformSpeed =
+    100
 
 
 main : Program () Model Msg
@@ -123,6 +129,10 @@ update msg model =
                       else
                         second model.playerVel + (second gravitation * delta)
                     )
+                , platforms =
+                    model.platforms
+                        |> List.map (\( x, y ) -> ( x, y + platformSpeed * delta ))
+                        |> List.filter (\( _, y ) -> y <= height + 100)
               }
             , Cmd.none
             )
@@ -173,6 +183,12 @@ update msg model =
 
                 NotHandled ->
                     ( model, Cmd.none )
+
+        SpawnPlatform _ ->
+            ( model, Cmd.none )
+
+        Noop ->
+            ( model, Cmd.none )
 
 
 centerX : Float

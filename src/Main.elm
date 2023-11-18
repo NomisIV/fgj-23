@@ -11,7 +11,7 @@ import Html.Attributes exposing (style)
 
 
 type alias Model =
-    { count : Float }
+    { playerPos : ( Float, Float ) }
 
 
 type Msg
@@ -21,35 +21,39 @@ type Msg
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \() -> ( { count = 0 }, Cmd.none )
+        { init = \() -> ( { playerPos = ( centerX, centerY ) }, Cmd.none )
         , view = view
         , update =
             \msg model ->
                 case msg of
                     Frame _ ->
-                        ( { model | count = model.count + 1 }, Cmd.none )
-        , subscriptions = \model -> onAnimationFrameDelta Frame
+                        ( model, Cmd.none )
+        , subscriptions = \_ -> onAnimationFrameDelta Frame
         }
 
 
+width : number
 width =
     400
 
 
+height : number
 height =
     400
 
 
+centerX : Float
 centerX =
     width / 2
 
 
+centerY : Float
 centerY =
     height / 2
 
 
 view : Model -> Html Msg
-view { count } =
+view model =
     div
         [ style "display" "flex"
         , style "justify-content" "center"
@@ -59,31 +63,23 @@ view { count } =
             ( width, height )
             [ style "border" "10px solid rgba(0,0,0,0.1)" ]
             [ clearScreen
-            , render count
+            , render model
             ]
         ]
 
 
+clearScreen : Renderable
 clearScreen =
-    shapes [ fill Color.white ] [ rect ( 0, 0 ) width height ]
+    shapes [ fill Color.black ] [ rect ( 0, 0 ) width height ]
 
 
-render count =
+render : Model -> Renderable
+render { playerPos } =
     let
         size =
             width / 3
-
-        x =
-            -(size / 2)
-
-        y =
-            -(size / 2)
     in
     shapes
-        [ transform
-            [ translate centerX centerY
-            , rotate (degrees (count * 3))
-            ]
-        , fill (Color.hsl (degrees (count / 4)) 0.3 0.7)
+        [ fill Color.red
         ]
-        [ rect ( x, y ) size size ]
+        [ rect playerPos size size ]

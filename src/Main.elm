@@ -128,7 +128,7 @@ update msg model =
             ( { model
                 | playerPos =
                     ( first model.playerPos + xDirection inputs * delta * playerSpeed
-                    , second model.playerPos + (second model.playerVel * delta)
+                    , second model.playerPos + ((second model.playerVel + platformSpeed) * delta)
                     )
                 , playerVel =
                     ( first model.playerVel + (first gravitation * delta)

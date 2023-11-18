@@ -360,5 +360,8 @@ handleKey dir repeat key =
             "ArrowUp" ->
                 dir UpArrow
 
+            " " ->
+                dir UpArrow
+
             _ ->
                 NotHandled

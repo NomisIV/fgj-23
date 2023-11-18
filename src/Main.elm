@@ -206,7 +206,7 @@ update msg model =
                 , score = model.score + 1
               }
             , if model.platformTimer < 0 then
-                Random.generate SpawnPlatform (Random.float 0 width)
+                Random.generate SpawnPlatform (Random.float 0 (width - first platformSize))
 
               else
                 Cmd.none

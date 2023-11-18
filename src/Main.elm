@@ -1,13 +1,14 @@
 module Main exposing (main)
 
 import Browser
-import Browser.Events exposing (onAnimationFrameDelta)
+import Browser.Events exposing (onAnimationFrameDelta, onKeyDown)
 import Canvas exposing (..)
 import Canvas.Settings exposing (..)
 import Canvas.Settings.Advanced exposing (..)
 import Color
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
+import Json.Decode as Decode
 
 
 type alias Model =
@@ -16,6 +17,7 @@ type alias Model =
 
 type Msg
     = Frame Float
+    | GotInput Input
 
 
 main : Program () Model Msg
@@ -28,7 +30,10 @@ main =
                 case msg of
                     Frame _ ->
                         ( model, Cmd.none )
-        , subscriptions = \_ -> onAnimationFrameDelta Frame
+
+                    GotInput _ ->
+                        ( model, Cmd.none )
+        , subscriptions = subscriptions
         }
 
 
@@ -83,3 +88,15 @@ render { playerPos } =
         [ fill Color.red
         ]
         [ rect playerPos size size ]
+
+
+type Input
+    = Down String
+
+
+subscriptions : model -> Sub Msg
+subscriptions _ =
+    Sub.batch
+        [ onKeyDown (Decode.field "key" Decode.string |> Decode.map (Down >> GotInput))
+        , onAnimationFrameDelta Frame
+        ]

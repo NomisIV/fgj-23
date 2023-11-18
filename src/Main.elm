@@ -38,12 +38,12 @@ emptyModel =
         , up = False
         }
     , platforms =
-        [ { x = 400, y = 500, id = 0 }
-        , { x = 400, y = 400, id = 1 }
-        , { x = 400, y = 300, id = 2 }
-        , { x = 400, y = 200, id = 3 }
+        [ { x = 400, y = 0, id = 5 }
         , { x = 400, y = 100, id = 4 }
-        , { x = 400, y = 0, id = 5 }
+        , { x = 400, y = 200, id = 3 }
+        , { x = 400, y = 300, id = 2 }
+        , { x = 400, y = 400, id = 1 }
+        , { x = 400, y = 500, id = 0 }
         ]
     , platformTimer = spawnRate
     , score = 0
